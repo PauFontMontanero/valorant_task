@@ -24,6 +24,7 @@
             <option value="$PROJECT_DIR$/domain" />
             <option value="$PROJECT_DIR$/domain-implementations" />
             <option value="$PROJECT_DIR$/domain-implementations/file" />
+            <option value="$PROJECT_DIR$/domain-implementations/jdbc" />
             <option value="$PROJECT_DIR$/utilities" />
           </set>
         </option>

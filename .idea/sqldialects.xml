@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/domain-implementations/jdbc/src/main/java/com.valorant.domain.jdbc/repositories/JdbcAgentRepository.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/domain-implementations/jdbc/src/main/java/com.valorant.domain.jdbc/repositories/JdbcMapRepository.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/domain-implementations/jdbc/src/main/java/com.valorant.domain.jdbc/repositories/JdbcMatchRepository.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/domain-implementations/jdbc/src/main/java/com.valorant.domain.jdbc/repositories/JdbcPlayerRepository.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/domain-implementations/jdbc/src/main/java/com.valorant.domain.jdbc/repositories/JdbcWeaponRepository.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/domain-implementations/jdbc/src/test/resources/schema.sql" dialect="MySQL" />
+    <file url="PROJECT" dialect="MySQL" />
+  </component>
+</project>
