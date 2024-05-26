@@ -11,6 +11,9 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * JDBC implementation of the {@link MapRepository} interface for managing maps in the Valorant game.
+ */
 public class JdbcMapRepository implements MapRepository {
 
     private static final String SELECT_ALL_MAPS = "SELECT * FROM map";
@@ -20,10 +23,21 @@ public class JdbcMapRepository implements MapRepository {
     private static final String DELETE_MAP = "DELETE FROM map WHERE map_id = ?";
     private final Connection connection;
 
+    /**
+     * Constructs a new JdbcMapRepository with the given database connection.
+     *
+     * @param connection the database connection.
+     */
     public JdbcMapRepository(Connection connection) {
         this.connection = connection;
     }
 
+    /**
+     * Retrieves a map by its name.
+     *
+     * @param name the name of the map.
+     * @return the map with the specified name, or null if not found.
+     */
     @Override
     public Map getByName(String name) {
         try (PreparedStatement statement = connection.prepareStatement(SELECT_MAP_BY_NAME)) {
@@ -39,6 +53,11 @@ public class JdbcMapRepository implements MapRepository {
         return null;
     }
 
+    /**
+     * Saves a new map to the database.
+     *
+     * @param map the map to be saved.
+     */
     @Override
     public void save(Map map) {
         try (PreparedStatement statement = connection.prepareStatement(INSERT_MAP, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -55,6 +74,11 @@ public class JdbcMapRepository implements MapRepository {
         }
     }
 
+    /**
+     * Deletes an existing map from the database.
+     *
+     * @param map the map to be deleted.
+     */
     @Override
     public void delete(Map map) {
         try (PreparedStatement statement = connection.prepareStatement(DELETE_MAP)) {
@@ -65,6 +89,12 @@ public class JdbcMapRepository implements MapRepository {
         }
     }
 
+    /**
+     * Retrieves a map by its unique identifier.
+     *
+     * @param id the unique identifier of the map.
+     * @return the map with the specified ID, or null if not found.
+     */
     @Override
     public Map get(Integer id) {
         try (PreparedStatement statement = connection.prepareStatement(SELECT_MAP_BY_ID)) {
@@ -80,6 +110,11 @@ public class JdbcMapRepository implements MapRepository {
         return null;
     }
 
+    /**
+     * Retrieves all maps from the database.
+     *
+     * @return a set of all maps.
+     */
     @Override
     public Set<Map> getAll() {
         Set<Map> maps = new HashSet<>();
@@ -95,7 +130,13 @@ public class JdbcMapRepository implements MapRepository {
         return maps;
     }
 
-    // Helper method to map ResultSet to Map object
+    /**
+     * Helper method to map ResultSet to Map object.
+     *
+     * @param resultSet the ResultSet containing map data.
+     * @return the mapped Map object.
+     * @throws SQLException if a database access error occurs.
+     */
     private Map mapResultSetToMap(ResultSet resultSet) throws SQLException {
         Map map = new MapImpl();
         map.setId(resultSet.getInt("map_id"));

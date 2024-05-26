@@ -8,6 +8,9 @@ import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * JDBC implementation of the {@link AgentRepository} interface for managing agents in the Valorant game.
+ */
 public class JdbcAgentRepository implements AgentRepository {
 
     private static final String SELECT_ALL_AGENTS = "SELECT * FROM AGENT";
@@ -17,10 +20,21 @@ public class JdbcAgentRepository implements AgentRepository {
     private static final String DELETE_AGENT = "DELETE FROM AGENT WHERE AGENT_ID = ?";
     private final Connection connection;
 
+    /**
+     * Constructs a new JdbcAgentRepository with the given database connection.
+     *
+     * @param connection the database connection.
+     */
     public JdbcAgentRepository(Connection connection) {
         this.connection = connection;
     }
 
+    /**
+     * Retrieves an agent by its name.
+     *
+     * @param name the name of the agent.
+     * @return the agent with the specified name, or null if not found.
+     */
     @Override
     public Agent getByName(String name) {
         try (PreparedStatement statement = connection.prepareStatement(SELECT_AGENT_BY_NAME)) {
@@ -36,6 +50,11 @@ public class JdbcAgentRepository implements AgentRepository {
         return null;
     }
 
+    /**
+     * Saves a new agent to the database.
+     *
+     * @param agent the agent to be saved.
+     */
     @Override
     public void save(Agent agent) {
         try (PreparedStatement statement = connection.prepareStatement(INSERT_AGENT, Statement.RETURN_GENERATED_KEYS)) {
@@ -54,6 +73,11 @@ public class JdbcAgentRepository implements AgentRepository {
         }
     }
 
+    /**
+     * Deletes an existing agent from the database.
+     *
+     * @param agent the agent to be deleted.
+     */
     @Override
     public void delete(Agent agent) {
         try (PreparedStatement statement = connection.prepareStatement(DELETE_AGENT)) {
@@ -64,6 +88,12 @@ public class JdbcAgentRepository implements AgentRepository {
         }
     }
 
+    /**
+     * Retrieves an agent by its unique identifier.
+     *
+     * @param id the unique identifier of the agent.
+     * @return the agent with the specified ID, or null if not found.
+     */
     @Override
     public Agent get(Integer id) {
         try (PreparedStatement statement = connection.prepareStatement(SELECT_AGENT_BY_ID)) {
@@ -79,6 +109,11 @@ public class JdbcAgentRepository implements AgentRepository {
         return null;
     }
 
+    /**
+     * Retrieves all agents from the database.
+     *
+     * @return a set of all agents.
+     */
     @Override
     public Set<Agent> getAll() {
         Set<Agent> agents = new HashSet<>();
@@ -94,7 +129,13 @@ public class JdbcAgentRepository implements AgentRepository {
         return agents;
     }
 
-    // Helper method to map ResultSet to Agent object
+    /**
+     * Helper method to map ResultSet to Agent object.
+     *
+     * @param resultSet the ResultSet containing agent data.
+     * @return the mapped Agent object.
+     * @throws SQLException if a database access error occurs.
+     */
     private Agent mapResultSetToAgent(ResultSet resultSet) throws SQLException {
         Agent agent = new AgentImpl();
         agent.setId(resultSet.getInt("AGENT_ID"));

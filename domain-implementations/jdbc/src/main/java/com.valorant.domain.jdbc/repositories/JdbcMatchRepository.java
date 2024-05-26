@@ -12,6 +12,11 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Repository class for managing matches in the Valorant game using JDBC.
+ * This repository handles operations such as saving, deleting, and retrieving matches from the database.
+ * Implements the {@link com.valorant.repositories.MatchRepository} interface.
+ */
 public class JdbcMatchRepository implements MatchRepository {
 
     private static final String SELECT_ALL_MATCHES = "SELECT * FROM `MATCH`";
@@ -20,6 +25,11 @@ public class JdbcMatchRepository implements MatchRepository {
     private static final String DELETE_MATCH = "DELETE FROM `MATCH` WHERE MATCH_ID = ?";
     private final Connection connection;
 
+    /**
+     * Constructs a new JdbcMatchRepository with the given database connection.
+     *
+     * @param connection the database connection.
+     */
     public JdbcMatchRepository(Connection connection) {
         this.connection = connection;
     }

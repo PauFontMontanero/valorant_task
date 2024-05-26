@@ -8,6 +8,10 @@ import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * JDBC implementation of the WeaponRepository interface.
+ * Implements {@link WeaponRepository}.
+ */
 public class JdbcWeaponRepository implements WeaponRepository {
 
     private static final String SELECT_ALL_WEAPONS = "SELECT WEAPON_ID, NAME, TYPE FROM weapon";
@@ -16,21 +20,35 @@ public class JdbcWeaponRepository implements WeaponRepository {
     private static final String DELETE_WEAPON = "DELETE FROM weapon WHERE WEAPON_ID = ?";
     private final Connection connection;
 
+    /**
+     * Constructs a new JdbcWeaponRepository with the given database connection.
+     *
+     * @param connection The database connection.
+     */
     public JdbcWeaponRepository(Connection connection) {
         this.connection = connection;
     }
 
-    @Override
+    /**
+     * Saves a weapon to the database.
+     *
+     * @param weapon The weapon to save.
+     */
     public void save(Weapon weapon) {
-        try (PreparedStatement statement = connection.prepareStatement(INSERT_WEAPON, Statement.RETURN_GENERATED_KEYS)) {
+        String sql = "INSERT INTO weapon (name, type) VALUES (?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, weapon.getName());
-            statement.setString(2, weapon.getType().toString());
-            statement.executeUpdate();
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+            statement.setString(2, weapon.getType());
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Saving weapon failed, no rows affected.");
+            }
+
+            try (var generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     weapon.setId(generatedKeys.getInt(1));
                 } else {
-                    throw new SQLException("Failed to save weapon, no ID obtained.");
+                    throw new SQLException("Saving weapon failed, no ID obtained.");
                 }
             }
         } catch (SQLException e) {
@@ -38,6 +56,11 @@ public class JdbcWeaponRepository implements WeaponRepository {
         }
     }
 
+    /**
+     * Deletes a weapon from the database.
+     *
+     * @param weapon The weapon to delete.
+     */
     @Override
     public void delete(Weapon weapon) {
         try (PreparedStatement statement = connection.prepareStatement(DELETE_WEAPON)) {
@@ -48,6 +71,12 @@ public class JdbcWeaponRepository implements WeaponRepository {
         }
     }
 
+    /**
+     * Retrieves a weapon from the database by its ID.
+     *
+     * @param id The ID of the weapon to retrieve.
+     * @return The retrieved weapon, or null if not found.
+     */
     @Override
     public Weapon get(Integer id) {
         try (PreparedStatement statement = connection.prepareStatement(SELECT_WEAPON_BY_ID)) {
@@ -63,6 +92,12 @@ public class JdbcWeaponRepository implements WeaponRepository {
         return null;
     }
 
+    /**
+     * Retrieves a weapon from the database by its name.
+     *
+     * @param name The name of the weapon to retrieve.
+     * @return The retrieved weapon, or null if not found.
+     */
     @Override
     public Weapon getByName(String name) {
         String SELECT_WEAPON_BY_NAME = "SELECT * FROM weapon WHERE name = ?";
@@ -79,7 +114,11 @@ public class JdbcWeaponRepository implements WeaponRepository {
         return null;
     }
 
-
+    /**
+     * Retrieves all weapons from the database.
+     *
+     * @return A set of all weapons.
+     */
     @Override
     public Set<Weapon> getAll() {
         Set<Weapon> weapons = new HashSet<>();

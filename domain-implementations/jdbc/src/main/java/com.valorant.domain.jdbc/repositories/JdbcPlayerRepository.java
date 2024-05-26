@@ -11,6 +11,11 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * JDBC implementation of PlayerRepository interface.
+ * This class manages operations related to players in the Valorant game using JDBC.
+ * Implements {@link PlayerRepository}.
+ */
 public class JdbcPlayerRepository implements PlayerRepository {
 
     private static final String SELECT_ALL_PLAYERS = "SELECT * FROM player";
@@ -19,10 +24,21 @@ public class JdbcPlayerRepository implements PlayerRepository {
     private static final String DELETE_PLAYER = "DELETE FROM player WHERE PLAYER_ID = ?";
     private final Connection connection;
 
+    /**
+     * Constructs a new JdbcPlayerRepository with the given database connection.
+     *
+     * @param connection The database connection.
+     */
     public JdbcPlayerRepository(Connection connection) {
         this.connection = connection;
     }
 
+    /**
+     * Saves a player to the database.
+     *
+     * @param player The player to save.
+     * @throws RuntimeException If an error occurs while saving the player.
+     */
     @Override
     public void save(Player player) {
         try (PreparedStatement statement = connection.prepareStatement(INSERT_PLAYER, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -43,6 +59,12 @@ public class JdbcPlayerRepository implements PlayerRepository {
         }
     }
 
+    /**
+     * Deletes a player from the database.
+     *
+     * @param player The player to delete.
+     * @throws RuntimeException If an error occurs while deleting the player.
+     */
     @Override
     public void delete(Player player) {
         try (PreparedStatement statement = connection.prepareStatement(DELETE_PLAYER)) {
@@ -53,6 +75,13 @@ public class JdbcPlayerRepository implements PlayerRepository {
         }
     }
 
+    /**
+     * Retrieves a player by their ID from the database.
+     *
+     * @param id The ID of the player to retrieve.
+     * @return The player object if found, null otherwise.
+     * @throws RuntimeException If an error occurs while fetching the player.
+     */
     @Override
     public Player get(Integer id) {
         try (PreparedStatement statement = connection.prepareStatement(SELECT_PLAYER_BY_ID)) {
@@ -68,6 +97,13 @@ public class JdbcPlayerRepository implements PlayerRepository {
         return null;
     }
 
+    /**
+     * Retrieves a player by their username from the database.
+     *
+     * @param username The username of the player to retrieve.
+     * @return The player object if found, null otherwise.
+     * @throws RuntimeException If an error occurs while fetching the player.
+     */
     @Override
     public Player getByUsername(String username) {
         String SELECT_PLAYER_BY_USERNAME = "SELECT * FROM player WHERE USERNAME = ?";
@@ -84,6 +120,13 @@ public class JdbcPlayerRepository implements PlayerRepository {
         return null;
     }
 
+    /**
+     * Retrieves a set of players by their region from the database.
+     *
+     * @param region The region of the players to retrieve.
+     * @return A set of player objects.
+     * @throws RuntimeException If an error occurs while fetching the players.
+     */
     @Override
     public Set<Player> getByRegion(String region) {
         String SELECT_PLAYERS_BY_REGION = "SELECT * FROM player WHERE REGION = ?";
@@ -101,23 +144,36 @@ public class JdbcPlayerRepository implements PlayerRepository {
         return players;
     }
 
-    @Override
-    public Set<Player> getByDisplayName(String displayName) {
-        String SELECT_PLAYERS_BY_DISPLAY_NAME = "SELECT * FROM player WHERE DISPLAY_NAME = ?";
-        Set<Player> players = new HashSet<>();
-        try (PreparedStatement statement = connection.prepareStatement(SELECT_PLAYERS_BY_DISPLAY_NAME)) {
-            statement.setString(1, displayName);
-            try (ResultSet resultSet = statement.executeQuery()) {
-                while (resultSet.next()) {
-                    players.add(mapResultSetToPlayer(resultSet));
-                }
+/**
+ * Retrieves a set of players by their display name from the database.
+ *
+ * @param displayName The display name of the players to retrieve.
+ * @return A set of player objects.
+ * @throws RuntimeException If an error occurs while fetching the players
+ */
+@Override
+public Set<Player> getByDisplayName(String displayName) {
+    String SELECT_PLAYERS_BY_DISPLAY_NAME = "SELECT * FROM player WHERE DISPLAY_NAME = ?";
+    Set<Player> players = new HashSet<>();
+    try (PreparedStatement statement = connection.prepareStatement(SELECT_PLAYERS_BY_DISPLAY_NAME)) {
+        statement.setString(1, displayName);
+        try (ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                players.add(mapResultSetToPlayer(resultSet));
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Error while fetching players by display name: " + displayName, e);
         }
-        return players;
+    } catch (SQLException e) {
+        throw new RuntimeException("Error while fetching players by display name: " + displayName, e);
     }
+    return players;
+}
 
+    /**
+     * Retrieves all players from the database.
+     *
+     * @return A set of all player objects.
+     * @throws RuntimeException If an error occurs while fetching the players.
+     */
     @Override
     public Set<Player> getAll() {
         Set<Player> players = new HashSet<>();

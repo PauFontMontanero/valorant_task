@@ -356,6 +356,7 @@ class JdbcPlayerRepositoryTest {
             agentRepository.save(agent);
 
             try {
+                // Ensure the player-agent relationship entry exists before the assignment
                 playerAgentRepository.assignAgentToPlayer(player.getId(), agent.getId());
             } catch (SQLException e) {
                 fail("SQLException occurred: " + e.getMessage());
@@ -372,13 +373,13 @@ class JdbcPlayerRepositoryTest {
         }
     }
 
-        @Nested
+    @Nested
     @DisplayName("Player Weapon Relationship Tests")
     class PlayerWeaponRelationshipTests {
 
         @Test
         @DisplayName("Given a player and a weapon, when weapon is assigned to player, then the relationship should be saved")
-        void assignWeaponToPlayerTest() throws SQLException {
+        void assignWeaponToPlayerTest() {
             Player player = new PlayerImpl();
             player.setUsername("weaponplayer");
             player.setDisplayName("Weapon Player");
@@ -387,7 +388,7 @@ class JdbcPlayerRepositoryTest {
             player.setRank("Gold 2");
             playerRepository.save(player);
 
-            Weapon weapon = new WeaponImpl(0, "Operator", "Sniper");
+            Weapon weapon = new WeaponImpl(0, "Operator", "Sniper Rifle");  // This should be "Sniper Rifle"
             weaponRepository.save(weapon);
 
             try {
