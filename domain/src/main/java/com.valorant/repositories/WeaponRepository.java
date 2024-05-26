@@ -13,7 +13,14 @@ public interface WeaponRepository extends Repository<Integer, Weapon> {
 
     // Override the save method to store a weapon entity in the repository.
     @Override
-    void save(Weapon model);
+    default void save(Weapon model) {
+        try {
+            // Implement save logic here
+        } catch (Exception e) {
+            // Handle the exception (e.g., logging, etc.)
+            // You can also choose to rethrow it as a different type of exception if needed
+        }
+    }
 
     // Override the delete method to remove a weapon entity from the repository.
     @Override

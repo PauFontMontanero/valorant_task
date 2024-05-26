@@ -14,10 +14,10 @@ import java.util.Set;
 
 public class JdbcMatchRepository implements MatchRepository {
 
-    private static final String SELECT_ALL_MATCHES = "SELECT * FROM match";
-    private static final String SELECT_MATCH_BY_ID = "SELECT * FROM match WHERE id = ?";
-    private static final String INSERT_MATCH = "INSERT INTO match (id, played_on, map_id, outcome) VALUES (?, ?, ?, ?)";
-    private static final String DELETE_MATCH = "DELETE FROM match WHERE id = ?";
+    private static final String SELECT_ALL_MATCHES = "SELECT * FROM `MATCH`";
+    private static final String SELECT_MATCH_BY_ID = "SELECT * FROM `MATCH` WHERE MATCH_ID = ?";
+    private static final String INSERT_MATCH = "INSERT INTO `MATCH` (PLAYED_ON, MAP_ID, OUTCOME) VALUES (?, ?, ?)";
+    private static final String DELETE_MATCH = "DELETE FROM `MATCH` WHERE MATCH_ID = ?";
     private final Connection connection;
 
     public JdbcMatchRepository(Connection connection) {
@@ -26,12 +26,19 @@ public class JdbcMatchRepository implements MatchRepository {
 
     @Override
     public void save(Match match) {
-        try (PreparedStatement statement = connection.prepareStatement(INSERT_MATCH)) {
-            statement.setInt(1, match.getId());
-            statement.setObject(2, match.getPlayedOn());
-            statement.setInt(3, match.getMapId());
-            statement.setString(4, match.getOutcome());
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_MATCH, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            statement.setObject(1, match.getPlayedOn());
+            statement.setInt(2, match.getMapId());
+            statement.setString(3, match.getOutcome());
             statement.executeUpdate();
+
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    match.setId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("Creating match failed, no ID obtained.");
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Error while saving match: " + match.getId(), e);
         }
@@ -79,7 +86,7 @@ public class JdbcMatchRepository implements MatchRepository {
 
     @Override
     public Set<Match> getByPlayedOn(LocalDateTime playedOn) {
-        String SELECT_MATCHES_BY_PLAYED_ON = "SELECT * FROM match WHERE played_on = ?";
+        String SELECT_MATCHES_BY_PLAYED_ON = "SELECT * FROM `match` WHERE PLAYED_ON = ?";
         Set<Match> matches = new HashSet<>();
         try (PreparedStatement statement = connection.prepareStatement(SELECT_MATCHES_BY_PLAYED_ON)) {
             statement.setObject(1, playedOn);
@@ -96,7 +103,7 @@ public class JdbcMatchRepository implements MatchRepository {
 
     @Override
     public Set<Match> getByMapId(int mapId) {
-        String SELECT_MATCHES_BY_MAP_ID = "SELECT * FROM match WHERE map_id = ?";
+        String SELECT_MATCHES_BY_MAP_ID = "SELECT * FROM `match` WHERE MAP_ID = ?";
         Set<Match> matches = new HashSet<>();
         try (PreparedStatement statement = connection.prepareStatement(SELECT_MATCHES_BY_MAP_ID)) {
             statement.setInt(1, mapId);
@@ -113,12 +120,11 @@ public class JdbcMatchRepository implements MatchRepository {
 
     // Helper method to map ResultSet to Match object
     private Match mapResultSetToMatch(ResultSet resultSet) throws SQLException {
-        Match match = new MatchImpl(); // Use MatchImpl instead of an anonymous implementation
-        match.setId(resultSet.getInt("id"));
-        match.setPlayedOn(resultSet.getObject("played_on", LocalDateTime.class));
-        match.setMapId(resultSet.getInt("map_id"));
-        match.setOutcome(resultSet.getString("outcome"));
+        Match match = new MatchImpl();
+        match.setId(resultSet.getInt("MATCH_ID"));
+        match.setPlayedOn(resultSet.getObject("PLAYED_ON", LocalDateTime.class));
+        match.setMapId(resultSet.getInt("MAP_ID"));
+        match.setOutcome(resultSet.getString("OUTCOME"));
         return match;
     }
-
 }

@@ -38,3 +38,4 @@ public interface Player {
     // Set the rank of the player.
     void setRank(String rank);
 }
+

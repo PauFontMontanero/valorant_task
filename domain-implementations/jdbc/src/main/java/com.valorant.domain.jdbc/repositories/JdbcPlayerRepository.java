@@ -14,9 +14,9 @@ import java.util.Set;
 public class JdbcPlayerRepository implements PlayerRepository {
 
     private static final String SELECT_ALL_PLAYERS = "SELECT * FROM player";
-    private static final String SELECT_PLAYER_BY_ID = "SELECT * FROM player WHERE id = ?";
-    private static final String INSERT_PLAYER = "INSERT INTO player (id, username, display_name, email, region, rank) VALUES (?, ?, ?, ?, ?, ?)";
-    private static final String DELETE_PLAYER = "DELETE FROM player WHERE id = ?";
+    private static final String SELECT_PLAYER_BY_ID = "SELECT * FROM player WHERE PLAYER_ID = ?";
+    private static final String INSERT_PLAYER = "INSERT INTO player (username, display_name, email, region, `rank`) VALUES (?, ?, ?, ?, ?)";
+    private static final String DELETE_PLAYER = "DELETE FROM player WHERE PLAYER_ID = ?";
     private final Connection connection;
 
     public JdbcPlayerRepository(Connection connection) {
@@ -25,16 +25,21 @@ public class JdbcPlayerRepository implements PlayerRepository {
 
     @Override
     public void save(Player player) {
-        try (PreparedStatement statement = connection.prepareStatement(INSERT_PLAYER)) {
-            statement.setInt(1, player.getId());
-            statement.setString(2, player.getUsername());
-            statement.setString(3, player.getDisplayName());
-            statement.setString(4, player.getEmail());
-            statement.setString(5, player.getRegion());
-            statement.setString(6, player.getRank());
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_PLAYER, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, player.getUsername());
+            statement.setString(2, player.getDisplayName());
+            statement.setString(3, player.getEmail());
+            statement.setString(4, player.getRegion());
+            statement.setString(5, player.getRank());
             statement.executeUpdate();
+
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    player.setId(generatedKeys.getInt(1));
+                }
+            }
         } catch (SQLException e) {
-            throw new RuntimeException("Error while saving player: " + player.getId(), e);
+            throw new RuntimeException("Error while saving player: " + player.getUsername(), e);
         }
     }
 
@@ -65,7 +70,7 @@ public class JdbcPlayerRepository implements PlayerRepository {
 
     @Override
     public Player getByUsername(String username) {
-        String SELECT_PLAYER_BY_USERNAME = "SELECT * FROM player WHERE username = ?";
+        String SELECT_PLAYER_BY_USERNAME = "SELECT * FROM player WHERE USERNAME = ?";
         try (PreparedStatement statement = connection.prepareStatement(SELECT_PLAYER_BY_USERNAME)) {
             statement.setString(1, username);
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -81,7 +86,7 @@ public class JdbcPlayerRepository implements PlayerRepository {
 
     @Override
     public Set<Player> getByRegion(String region) {
-        String SELECT_PLAYERS_BY_REGION = "SELECT * FROM player WHERE region = ?";
+        String SELECT_PLAYERS_BY_REGION = "SELECT * FROM player WHERE REGION = ?";
         Set<Player> players = new HashSet<>();
         try (PreparedStatement statement = connection.prepareStatement(SELECT_PLAYERS_BY_REGION)) {
             statement.setString(1, region);
@@ -98,7 +103,7 @@ public class JdbcPlayerRepository implements PlayerRepository {
 
     @Override
     public Set<Player> getByDisplayName(String displayName) {
-        String SELECT_PLAYERS_BY_DISPLAY_NAME = "SELECT * FROM player WHERE display_name = ?";
+        String SELECT_PLAYERS_BY_DISPLAY_NAME = "SELECT * FROM player WHERE DISPLAY_NAME = ?";
         Set<Player> players = new HashSet<>();
         try (PreparedStatement statement = connection.prepareStatement(SELECT_PLAYERS_BY_DISPLAY_NAME)) {
             statement.setString(1, displayName);
@@ -131,13 +136,12 @@ public class JdbcPlayerRepository implements PlayerRepository {
     // Helper method to map ResultSet to Player object
     private Player mapResultSetToPlayer(ResultSet resultSet) throws SQLException {
         Player player = new PlayerImpl();
-        player.setId(resultSet.getInt("id"));
-        player.setUsername(resultSet.getString("username"));
-        player.setDisplayName(resultSet.getString("display_name"));
-        player.setEmail(resultSet.getString("email"));
-        player.setRegion(resultSet.getString("region"));
-        player.setRank(resultSet.getString("rank"));
+        player.setId(resultSet.getInt("PLAYER_ID"));
+        player.setUsername(resultSet.getString("USERNAME"));
+        player.setDisplayName(resultSet.getString("DISPLAY_NAME"));
+        player.setEmail(resultSet.getString("EMAIL"));
+        player.setRegion(resultSet.getString("REGION"));
+        player.setRank(resultSet.getString("RANK"));
         return player;
     }
-
 }

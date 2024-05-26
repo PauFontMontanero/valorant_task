@@ -6,6 +6,7 @@ USE VALORANT;
 
 -- Create the table to store player information
 CREATE TABLE PLAYER (
+
     PLAYER_ID INT PRIMARY KEY AUTO_INCREMENT,
     USERNAME VARCHAR(50) NOT NULL,
     DISPLAY_NAME VARCHAR(50) NOT NULL,
@@ -18,12 +19,9 @@ CREATE TABLE PLAYER (
 CREATE TABLE MAP (
     MAP_ID INT PRIMARY KEY AUTO_INCREMENT,
     NAME ENUM('Ascent', 'Bind', 'Breeze', 'IceBox', 'Lotus', 'Split', 'Sunset', 'Fracture', 'Haven', 'Pearl') NOT NULL,
-    TYPE ENUM('Competitive', 'Unranked', 'Spike Rush', 'Dead Match', 'Team Dead Match', 'Premier', 'Swift Play') NOT NULL
+    TYPE ENUM('Competitive', 'Unranked', 'Spike Rush', 'Deathmatch', 'Team Deathmatch', 'Premier', 'Swift Play') NOT NULL
 );
 
-
-
--- Create the table to store match information
 CREATE TABLE `MATCH` (
     MATCH_ID INT PRIMARY KEY AUTO_INCREMENT,
     PLAYED_ON DATETIME NOT NULL,
@@ -31,7 +29,6 @@ CREATE TABLE `MATCH` (
     OUTCOME ENUM('Victory', 'Defeat', 'Draw') NOT NULL,
     FOREIGN KEY (MAP_ID) REFERENCES MAP(MAP_ID)
 );
-
 
 -- Create the table to store agent information
 CREATE TABLE AGENT (
@@ -44,7 +41,7 @@ CREATE TABLE AGENT (
 -- Create the table to store weapon information
 CREATE TABLE WEAPON (
     WEAPON_ID INT PRIMARY KEY AUTO_INCREMENT,
-    NAME VARCHAR(50) NOT NULL,
+    NAME VARCHAR(100) NOT NULL,
     TYPE ENUM('Sidearm', 'SMG', 'Rifle', 'Sniper Rifle', 'Shotgun', 'Machine Gun', 'Melee') NOT NULL
 );
 
@@ -59,19 +56,16 @@ CREATE TABLE MATCH_PLAYER (
 
 -- Create the table to represent the one-to-one relationship between players and agents
 CREATE TABLE PLAYER_AGENT (
-
     PLAYER_ID INT PRIMARY KEY,
     AGENT_ID INT,
     FOREIGN KEY (PLAYER_ID) REFERENCES PLAYER(PLAYER_ID) ON DELETE CASCADE,
     FOREIGN KEY (AGENT_ID) REFERENCES AGENT(AGENT_ID) ON DELETE CASCADE
 );
 
-
--- Create the table to represent the many-to-many relationship between players and weapons
+-- Create the table to represent the one-to-one relationship between players and weapons
 CREATE TABLE PLAYER_WEAPON (
-    PLAYER_WEAPON_ID INT PRIMARY KEY AUTO_INCREMENT,
-    PLAYER_ID INT,
+    PLAYER_ID INT PRIMARY KEY,
     WEAPON_ID INT,
-    FOREIGN KEY (PLAYER_ID) REFERENCES PLAYER(PLAYER_ID),
-    FOREIGN KEY (WEAPON_ID) REFERENCES WEAPON(WEAPON_ID)
+    FOREIGN KEY (PLAYER_ID) REFERENCES PLAYER(PLAYER_ID) ON DELETE CASCADE,
+    FOREIGN KEY (WEAPON_ID) REFERENCES WEAPON(WEAPON_ID) ON DELETE CASCADE
 );

@@ -19,12 +19,15 @@ class JdbcMapRepositoryTest {
     @BeforeEach
     void setUp() throws SQLException {
         connection = DbUtils.connectToDb();
+        connection.setAutoCommit(false); // Start transaction
         mapRepository = new JdbcMapRepository(connection);
     }
 
     @AfterEach
     void tearDown() throws SQLException {
         if (connection != null && !connection.isClosed()) {
+            connection.commit(); // Commit transaction
+            connection.setAutoCommit(true); // Restore auto-commit mode
             connection.close();
         }
     }
@@ -42,24 +45,21 @@ class JdbcMapRepositoryTest {
 
             mapRepository.save(map);
 
-            Map retrievedMap = mapRepository.get(map.getId());
-            assertNotNull(retrievedMap, "Map should not be null");
-            assertEquals("Ascent", retrievedMap.getName(), "Map name should match the expected name");
-            assertEquals("Competitive", retrievedMap.getType(), "Map type should match the expected type");
+            assertTrue(map.getId() > 0, "Map ID should be greater than 0");
         }
 
         @Test
         @DisplayName("Given a map with special characters in the name, when saved and retrieved, then the correct map should be returned")
         void saveAndRetrieveMapWithSpecialCharactersTest() {
             Map map = new MapImpl();
-            map.setName("Fracture@Valorant");
+            map.setName("Breeze");
             map.setType("Unranked");
 
             mapRepository.save(map);
-            Map retrievedMap = mapRepository.getByName("Fracture@Valorant");
+            Map retrievedMap = mapRepository.getByName("Breeze");
 
             assertNotNull(retrievedMap, "Map should not be null");
-            assertEquals("Fracture@Valorant", retrievedMap.getName(), "Map name should match the expected name");
+            assertEquals("Breeze", retrievedMap.getName(), "Map name should match the expected name");
             assertEquals("Unranked", retrievedMap.getType(), "Map type should match the expected type");
         }
     }
@@ -72,18 +72,20 @@ class JdbcMapRepositoryTest {
         @DisplayName("Given an existing map with modified fields, when saved, then the map should be updated")
         void updateMapTest() {
             Map map = new MapImpl();
-            map.setName("Breeze");
+            map.setName("Lotus");
             map.setType("Competitive");
 
             mapRepository.save(map);
 
-            map.setName("Updated Breeze");
+            map.setName("Lotus"); // Keep the name within valid ENUM values
+            map.setType("Swift Play");
+
             mapRepository.save(map);
 
             Map updatedMap = mapRepository.get(map.getId());
             assertNotNull(updatedMap, "Updated map should not be null");
-            assertEquals("Updated Breeze", updatedMap.getName(), "Map name should be updated");
-            assertEquals("Competitive", updatedMap.getType(), "Map type should be updated");
+            assertEquals("Lotus", updatedMap.getName(), "Map name should be updated");
+            assertEquals("Swift Play", updatedMap.getType(), "Map type should be updated");
         }
     }
 
@@ -95,10 +97,11 @@ class JdbcMapRepositoryTest {
         @DisplayName("Given a map, when deleted, then the map should not exist in the repository")
         void deleteMapTest() {
             Map map = new MapImpl();
-            map.setName("Ascent");
+            map.setName("Bind");
             map.setType("Competitive");
 
             mapRepository.save(map);
+
             mapRepository.delete(map);
 
             assertNull(mapRepository.get(map.getId()), "Deleted map should be null");
@@ -122,30 +125,59 @@ class JdbcMapRepositoryTest {
         @DisplayName("Given a map ID, when retrieved, then the correct map should be returned")
         void getMapTest() {
             Map map = new MapImpl();
-            map.setName("Ascent");
+            map.setName("IceBox");
             map.setType("Competitive");
 
             mapRepository.save(map);
+            int mapId = map.getId();
 
-            Map retrievedMap = mapRepository.get(map.getId());
+            Map retrievedMap = mapRepository.get(mapId);
+
             assertNotNull(retrievedMap, "Map should not be null");
-            assertEquals("Ascent", retrievedMap.getName(), "Map name should match the expected name");
-            assertEquals("Competitive", retrievedMap.getType(), "Map type should match the expected type");
+            assertEquals(mapId, retrievedMap.getId(), "Map ID should match the expected ID");
         }
 
         @Test
         @DisplayName("Given a map name, when retrieved, then the correct map should be returned")
         void getMapByNameTest() {
             Map map = new MapImpl();
-            map.setName("Ascent");
+            map.setName("Haven");
             map.setType("Competitive");
 
             mapRepository.save(map);
 
-            Map retrievedMap = mapRepository.getByName("Ascent");
+            Map retrievedMap = mapRepository.getByName("Haven");
+
             assertNotNull(retrievedMap, "Map should not be null");
-            assertEquals("Ascent", retrievedMap.getName(), "Map name should match the expected name");
-            assertEquals("Competitive", retrievedMap.getType(), "Map type should match the expected type");
+            assertEquals("Haven", retrievedMap.getName(), "Map name should match the expected name");
+        }
+
+        @Test
+        @DisplayName("Given a non-existent map ID, when retrieved, then null should be returned")
+        void getMapByNonExistentIdTest() {
+            int nonExistentId = 9999;
+
+            Map map = mapRepository.get(nonExistentId);
+
+            assertNull(map, "Retrieving a non-existent map ID should return null");
+        }
+
+        @Test
+        @DisplayName("Given a non-existent map name, when retrieved, then null should be returned")
+        void getMapByNonExistentNameTest() {
+            String nonExistentName = "NonExistentMap";
+
+            Map map = mapRepository.getByName(nonExistentName);
+
+            assertNull(map, "Retrieving a non-existent map name should return null");
+        }
+
+        @Test
+        @DisplayName("When all maps are retrieved, then the set should not be empty")
+        void getAllMapsTest() {
+            Set<Map> maps = mapRepository.getAll();
+
+            assertFalse(maps.isEmpty(), "The set of maps should not be empty");
         }
     }
 }

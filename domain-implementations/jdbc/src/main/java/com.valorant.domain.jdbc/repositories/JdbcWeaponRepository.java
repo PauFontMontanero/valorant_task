@@ -4,19 +4,16 @@ import com.valorant.models.Weapon;
 import com.valorant.models.WeaponImpl;
 import com.valorant.repositories.WeaponRepository;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
 public class JdbcWeaponRepository implements WeaponRepository {
 
-    private static final String SELECT_ALL_WEAPONS = "SELECT * FROM weapon";
-    private static final String SELECT_WEAPON_BY_ID = "SELECT * FROM weapon WHERE id = ?";
-    private static final String INSERT_WEAPON = "INSERT INTO weapon (id, name, type) VALUES (?, ?, ?)";
-    private static final String DELETE_WEAPON = "DELETE FROM weapon WHERE id = ?";
+    private static final String SELECT_ALL_WEAPONS = "SELECT WEAPON_ID, NAME, TYPE FROM weapon";
+    private static final String SELECT_WEAPON_BY_ID = "SELECT * FROM weapon WHERE WEAPON_ID = ?";
+    private static final String INSERT_WEAPON = "INSERT INTO weapon (NAME, TYPE) VALUES (?, ?)";
+    private static final String DELETE_WEAPON = "DELETE FROM weapon WHERE WEAPON_ID = ?";
     private final Connection connection;
 
     public JdbcWeaponRepository(Connection connection) {
@@ -25,13 +22,19 @@ public class JdbcWeaponRepository implements WeaponRepository {
 
     @Override
     public void save(Weapon weapon) {
-        try (PreparedStatement statement = connection.prepareStatement(INSERT_WEAPON)) {
-            statement.setInt(1, weapon.getId());
-            statement.setString(2, weapon.getName());
-            statement.setString(3, weapon.getType());
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_WEAPON, Statement.RETURN_GENERATED_KEYS)) {
+            statement.setString(1, weapon.getName());
+            statement.setString(2, weapon.getType().toString());
             statement.executeUpdate();
+            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    weapon.setId(generatedKeys.getInt(1));
+                } else {
+                    throw new SQLException("Failed to save weapon, no ID obtained.");
+                }
+            }
         } catch (SQLException e) {
-            throw new RuntimeException("Error while saving weapon: " + weapon.getId(), e);
+            throw new RuntimeException("Error while saving weapon: " + weapon.getName(), e);
         }
     }
 
@@ -94,9 +97,9 @@ public class JdbcWeaponRepository implements WeaponRepository {
 
     // Helper method to map ResultSet to Weapon object
     private Weapon mapResultSetToWeapon(ResultSet resultSet) throws SQLException {
-        int id = resultSet.getInt("id");
-        String name = resultSet.getString("name");
-        String type = resultSet.getString("type");
+        int id = resultSet.getInt("WEAPON_ID");
+        String name = resultSet.getString("NAME");
+        String type = resultSet.getString("TYPE");
         return new WeaponImpl(id, name, type);
     }
 }
