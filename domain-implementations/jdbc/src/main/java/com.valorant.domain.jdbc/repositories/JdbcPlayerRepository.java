@@ -22,6 +22,7 @@ public class JdbcPlayerRepository implements PlayerRepository {
     private static final String SELECT_PLAYER_BY_ID = "SELECT * FROM player WHERE PLAYER_ID = ?";
     private static final String INSERT_PLAYER = "INSERT INTO player (username, display_name, email, region, `rank`) VALUES (?, ?, ?, ?, ?)";
     private static final String DELETE_PLAYER = "DELETE FROM player WHERE PLAYER_ID = ?";
+    private static final String UPDATE_PLAYER = "UPDATE player SET username = ?, display_name = ?, email = ?, region = ?, `rank` = ? WHERE PLAYER_ID = ?";
     private final Connection connection;
 
     /**
@@ -41,23 +42,40 @@ public class JdbcPlayerRepository implements PlayerRepository {
      */
     @Override
     public void save(Player player) {
-        try (PreparedStatement statement = connection.prepareStatement(INSERT_PLAYER, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, player.getUsername());
-            statement.setString(2, player.getDisplayName());
-            statement.setString(3, player.getEmail());
-            statement.setString(4, player.getRegion());
-            statement.setString(5, player.getRank());
-            statement.executeUpdate();
-
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    player.setId(generatedKeys.getInt(1));
+        try {
+            if (player.getId() == 0) {
+                // Insert a new player
+                try (PreparedStatement statement = connection.prepareStatement(INSERT_PLAYER, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                    statement.setString(1, player.getUsername());
+                    statement.setString(2, player.getDisplayName());
+                    statement.setString(3, player.getEmail());
+                    statement.setString(4, player.getRegion());
+                    statement.setString(5, player.getRank());
+                    statement.executeUpdate();
+                    ResultSet generatedKeys = statement.getGeneratedKeys();
+                    if (generatedKeys.next()) {
+                        player.setId(generatedKeys.getInt(1));
+                    } else {
+                        throw new SQLException("Failed to retrieve auto-generated ID.");
+                    }
+                }
+            } else {
+                // Update an existing player
+                try (PreparedStatement statement = connection.prepareStatement(UPDATE_PLAYER)) {
+                    statement.setString(1, player.getUsername());
+                    statement.setString(2, player.getDisplayName());
+                    statement.setString(3, player.getEmail());
+                    statement.setString(4, player.getRegion());
+                    statement.setString(5, player.getRank());
+                    statement.setInt(6, player.getId());
+                    statement.executeUpdate();
                 }
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error while saving player: " + player.getUsername(), e);
         }
     }
+
 
     /**
      * Deletes a player from the database.

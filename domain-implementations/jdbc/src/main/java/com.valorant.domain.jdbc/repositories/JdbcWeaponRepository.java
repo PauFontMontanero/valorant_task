@@ -16,8 +16,8 @@ public class JdbcWeaponRepository implements WeaponRepository {
 
     private static final String SELECT_ALL_WEAPONS = "SELECT WEAPON_ID, NAME, TYPE FROM weapon";
     private static final String SELECT_WEAPON_BY_ID = "SELECT * FROM weapon WHERE WEAPON_ID = ?";
-    private static final String INSERT_WEAPON = "INSERT INTO weapon (NAME, TYPE) VALUES (?, ?)";
     private static final String DELETE_WEAPON = "DELETE FROM weapon WHERE WEAPON_ID = ?";
+    private static final String UPDATE_WEAPON = "UPDATE weapon SET NAME = ?, TYPE = ? WHERE WEAPON_ID = ?";
     private final Connection connection;
 
     /**
@@ -53,6 +53,22 @@ public class JdbcWeaponRepository implements WeaponRepository {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error while saving weapon: " + weapon.getName(), e);
+        }
+    }
+
+    /**
+     * Updates a weapon in the database.
+     *
+     * @param weapon The weapon to update.
+     */
+    public void update(Weapon weapon) {
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_WEAPON)) {
+            statement.setString(1, weapon.getName());
+            statement.setString(2, weapon.getType());
+            statement.setInt(3, weapon.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error while updating weapon: " + weapon.getName(), e);
         }
     }
 

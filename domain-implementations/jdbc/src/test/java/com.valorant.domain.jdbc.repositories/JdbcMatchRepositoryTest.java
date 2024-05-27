@@ -34,6 +34,7 @@ class JdbcMatchRepositoryTest {
         connection.setAutoCommit(false); // Start transaction
         matchRepository = new JdbcMatchRepository(connection);
         mapRepository = new JdbcMapRepository(connection);
+        // Insert maps if they don't exist
         insertMapsIfNotExist();
     }
 
@@ -67,11 +68,12 @@ class JdbcMatchRepositoryTest {
             map2.setType("Competitive");
 
             Map map3 = new MapImpl();
-            map2.setName("IceBox");
-            map2.setType("Spike Rush");
+            map3.setName("IceBox");
+            map3.setType("Spike Rush");
 
             mapRepository.save(map1);
             mapRepository.save(map2);
+            mapRepository.save(map3);
         }
     }
 

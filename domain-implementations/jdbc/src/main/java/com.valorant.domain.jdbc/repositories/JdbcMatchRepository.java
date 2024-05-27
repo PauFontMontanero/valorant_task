@@ -4,10 +4,7 @@ import com.valorant.models.Match;
 import com.valorant.repositories.MatchRepository;
 import com.valorant.models.MatchImpl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,6 +20,7 @@ public class JdbcMatchRepository implements MatchRepository {
     private static final String SELECT_MATCH_BY_ID = "SELECT * FROM `MATCH` WHERE MATCH_ID = ?";
     private static final String INSERT_MATCH = "INSERT INTO `MATCH` (PLAYED_ON, MAP_ID, OUTCOME) VALUES (?, ?, ?)";
     private static final String DELETE_MATCH = "DELETE FROM `MATCH` WHERE MATCH_ID = ?";
+    private static final String UPDATE_MATCH = "UPDATE `MATCH` SET PLAYED_ON = ?, MAP_ID = ?, OUTCOME = ? WHERE MATCH_ID = ?";
     private final Connection connection;
 
     /**
@@ -36,23 +34,36 @@ public class JdbcMatchRepository implements MatchRepository {
 
     @Override
     public void save(Match match) {
-        try (PreparedStatement statement = connection.prepareStatement(INSERT_MATCH, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            statement.setObject(1, match.getPlayedOn());
-            statement.setInt(2, match.getMapId());
-            statement.setString(3, match.getOutcome());
-            statement.executeUpdate();
-
-            try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    match.setId(generatedKeys.getInt(1));
-                } else {
-                    throw new SQLException("Creating match failed, no ID obtained.");
+        try {
+            if (match.getId() == 0) {
+                // Insert a new match
+                try (PreparedStatement statement = connection.prepareStatement(INSERT_MATCH, Statement.RETURN_GENERATED_KEYS)) {
+                    statement.setObject(1, match.getPlayedOn());
+                    statement.setInt(2, match.getMapId());
+                    statement.setString(3, match.getOutcome());
+                    statement.executeUpdate();
+                    ResultSet generatedKeys = statement.getGeneratedKeys();
+                    if (generatedKeys.next()) {
+                        match.setId(generatedKeys.getInt(1));
+                    } else {
+                        throw new SQLException("Failed to retrieve auto-generated ID.");
+                    }
+                }
+            } else {
+                // Update an existing match
+                try (PreparedStatement statement = connection.prepareStatement(UPDATE_MATCH)) {
+                    statement.setObject(1, match.getPlayedOn());
+                    statement.setInt(2, match.getMapId());
+                    statement.setString(3, match.getOutcome());
+                    statement.setInt(4, match.getId());
+                    statement.executeUpdate();
                 }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error while saving match: " + match.getId(), e);
+            throw new RuntimeException("Error while saving/updating match: " + match.getId(), e);
         }
     }
+
 
     @Override
     public void delete(Match match) {

@@ -6,6 +6,8 @@ import com.valorant.dbtestutils.db.DbUtils;
 import org.junit.jupiter.api.*;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Set;
 
@@ -34,18 +36,27 @@ class JdbcWeaponRepositoryTest {
         insertSampleData();
     }
 
+    /**
+     * Inserts sample data into the database for testing purposes if the table is empty.
+     */
     private void insertSampleData() {
         try {
-            // Sample weapon data
-            Weapon weapon1 = new WeaponImpl(0, "Phantom", "Rifle");
-            Weapon weapon2 = new WeaponImpl(0, "Vandal", "Rifle");
+            // Check if there is existing data in the table
+            boolean tableIsEmpty = checkIfTableIsEmpty();
 
-            // Save the sample weapons
-            weaponRepository.save(weapon1);
-            weaponRepository.save(weapon2);
+            // If the table is empty, insert sample data
+            if (tableIsEmpty) {
+                // Sample weapon data
+                Weapon weapon1 = new WeaponImpl(0, "Phantom", "Rifle");
+                Weapon weapon2 = new WeaponImpl(0, "Vandal", "Rifle");
 
-            // Commit the transaction
-            connection.commit();
+                // Save the sample weapons
+                weaponRepository.save(weapon1);
+                weaponRepository.save(weapon2);
+
+                // Commit the transaction
+                connection.commit();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
             // Rollback transaction if an exception occurs
@@ -56,6 +67,26 @@ class JdbcWeaponRepositoryTest {
             }
         }
     }
+
+    /**
+     * Checks if the weapon table is empty.
+     *
+     * @return true if the table is empty, false otherwise.
+     * @throws SQLException if a database access error occurs
+     */
+    private boolean checkIfTableIsEmpty() throws SQLException {
+        String countQuery = "SELECT COUNT(*) FROM weapon";
+        try (PreparedStatement statement = connection.prepareStatement(countQuery)) {
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    int count = resultSet.getInt(1);
+                    return count == 0;
+                }
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Commits the transaction and closes the database connection after each test.
@@ -109,20 +140,26 @@ class JdbcWeaponRepositoryTest {
         @DisplayName("Given an existing weapon with modified fields, when saved, then the weapon should be updated")
         void updateWeaponTest() {
             // Arrange
-            Weapon weapon = new WeaponImpl(0, "Vandal", "Rifle");
+            Weapon weapon = new WeaponImpl(0, "Shorty", "Shotgun");
 
+            // Save the original weapon to the repository
             weaponRepository.save(weapon);
 
-            weapon = new WeaponImpl(weapon.getId(), "Updated Vandal", "Rifle"); // Using a valid type
+            // Retrieve the weapon from the repository to get its ID
+            Weapon originalWeapon = weaponRepository.getByName("Shorty");
+
+            // Update the attributes of the retrieved weapon
+            originalWeapon.setName("Operator");
+            originalWeapon.setType("Sniper Rifle");
 
             // Act
-            weaponRepository.save(weapon);
+            weaponRepository.update(originalWeapon);
 
             // Assert
-            Weapon updatedWeapon = weaponRepository.get(weapon.getId());
+            Weapon updatedWeapon = weaponRepository.get(originalWeapon.getId());
             assertNotNull(updatedWeapon, "Updated weapon should not be null");
-            assertEquals("Updated Vandal", updatedWeapon.getName(), "Weapon name should be updated");
-            assertEquals("Rifle", updatedWeapon.getType(), "Weapon type should be updated"); // Asserting against the original type
+            assertEquals("Operator", updatedWeapon.getName(), "Weapon name should be updated");
+            assertEquals("Sniper Rifle", updatedWeapon.getType(), "Weapon type should be updated");
         }
     }
 
@@ -164,6 +201,8 @@ class JdbcWeaponRepositoryTest {
             assertDoesNotThrow(() -> weaponRepository.delete(new WeaponImpl(nonExistentId, null, null)),
                     "Deleting a non-existent weapon should not throw an exception");
         }
+    }
+
     /**
      * Tests for weapon retrieval functionality.
      */
@@ -223,5 +262,4 @@ class JdbcWeaponRepositoryTest {
             assertFalse(weapons.isEmpty(), "The set of weapons should not be empty");
         }
     }
-}
 }

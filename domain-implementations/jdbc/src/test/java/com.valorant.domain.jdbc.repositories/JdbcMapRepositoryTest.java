@@ -78,16 +78,16 @@ class JdbcMapRepositoryTest {
         void saveAndRetrieveMapWithSpecialCharactersTest() {
             // Arrange
             Map map = new MapImpl();
-            map.setName("Breeze");
+            map.setName("Breeze@");
             map.setType("Unranked");
 
             // Act
             mapRepository.save(map);
-            Map retrievedMap = mapRepository.getByName("Breeze");
+            Map retrievedMap = mapRepository.getByName("Breeze@");
 
             // Assert
             assertNotNull(retrievedMap, "Map should not be null");
-            assertEquals("Breeze", retrievedMap.getName(), "Map name should match the expected name");
+            assertEquals("Breeze@", retrievedMap.getName(), "Map name should match the expected name");
             assertEquals("Unranked", retrievedMap.getType(), "Map type should match the expected type");
         }
     }
@@ -112,7 +112,7 @@ class JdbcMapRepositoryTest {
 
             mapRepository.save(map);
 
-            map.setName("Lotus"); // Keep the name within valid ENUM values
+            map.setName("Lotus");
             map.setType("Swift Play");
 
             // Act

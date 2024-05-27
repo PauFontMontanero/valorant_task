@@ -60,9 +60,9 @@ class JdbcAgentRepositoryTest {
         void saveNewAgentTest() {
             // Arrange
             Agent agent = new AgentImpl();
-            agent.setName("Jett");
-            agent.setDescription("A duelist with great mobility and offensive capabilities.");
-            agent.setRole("Duelist");
+            agent.setName("Viper");
+            agent.setDescription("The American Chemist, Viper deploys an array of poisonous chemical devices to control the battlefield and choke the enemy's vision. If the toxins don't kill her prey, her mindgames surely will.");
+            agent.setRole("Controller");
 
             // Act
             agentRepository.save(agent);
@@ -80,7 +80,7 @@ class JdbcAgentRepositoryTest {
             // Arrange
             Agent agent = new AgentImpl();
             agent.setName("Reyna@Valorant");
-            agent.setDescription("A duelist with vampiric abilities.");
+            agent.setDescription("Forged in the heart of Mexico, Reyna dominates single combat, popping off with each kill she scores. Her capability is only limited by her raw skill, making her highly dependent on performance.");
             agent.setRole("Duelist");
 
             // Act
@@ -90,7 +90,7 @@ class JdbcAgentRepositoryTest {
             // Assert
             assertNotNull(retrievedAgent, "Agent should not be null");
             assertEquals("Reyna@Valorant", retrievedAgent.getName(), "Agent name should match the expected name");
-            assertEquals("A duelist with vampiric abilities.", retrievedAgent.getDescription(), "Agent description should match the expected description");
+            assertEquals("Forged in the heart of Mexico, Reyna dominates single combat, popping off with each kill she scores. Her capability is only limited by her raw skill, making her highly dependent on performance.", retrievedAgent.getDescription(), "Agent description should match the expected description");
             assertEquals("Duelist", retrievedAgent.getRole(), "Agent role should match the expected role");
         }
     }
@@ -110,23 +110,30 @@ class JdbcAgentRepositoryTest {
         void updateAgentTest() {
             // Arrange
             Agent agent = new AgentImpl();
-            agent.setName("Phoenix");
-            agent.setDescription("A duelist with fire-based abilities.");
+            agent.setName("Neon");
+            agent.setDescription("Filipino Agent Neon surges forward at shocking speeds, discharging bursts of bioelectric radiance as fast as her body generates it. She races ahead to catch enemies off guard, then strikes them down quicker than lightning.");
             agent.setRole("Duelist");
 
             agentRepository.save(agent);
+            int agentId = agent.getId();
 
-            agent.setName("Updated Phoenix");
-            agent.setDescription("An updated duelist with fire-based abilities.");
+            // Retrieve the agent from the repository to ensure it was saved correctly
+            agent = agentRepository.get(agentId);
+            assertNotNull(agent, "Agent should not be null");
 
-            // Act
+            // Update the agent's fields
+            agent.setName("Updated Neon");
+            agent.setDescription("Filipino Agent Neon surges forward at shocking speeds, discharging bursts of bioelectric radiance as fast as her body generates it. She races ahead to catch enemies off guard, then strikes them down quicker than lightning.");
+
+            // Act: Save the updated agent
             agentRepository.save(agent);
 
             // Assert
-            Agent updatedAgent = agentRepository.get(agent.getId());
+            Agent updatedAgent = agentRepository.get(agentId);
             assertNotNull(updatedAgent, "Updated agent should not be null");
-            assertEquals("Updated Phoenix", updatedAgent.getName(), "Agent name should be updated");
-            assertEquals("An updated duelist with fire-based abilities.", updatedAgent.getDescription(), "Agent description should be updated");
+            assertEquals(agentId, updatedAgent.getId(), "Agent ID should remain unchanged");
+            assertEquals("Updated Neon", updatedAgent.getName(), "Agent name should be updated");
+            assertEquals("Filipino Agent Neon surges forward at shocking speeds, discharging bursts of bioelectric radiance as fast as her body generates it. She races ahead to catch enemies off guard, then strikes them down quicker than lightning.", updatedAgent.getDescription(), "Agent description should be updated");
             assertEquals("Duelist", updatedAgent.getRole(), "Agent role should be updated");
         }
     }
@@ -147,7 +154,7 @@ class JdbcAgentRepositoryTest {
             // Arrange
             Agent agent = new AgentImpl();
             agent.setName("Sova");
-            agent.setDescription("An initiator with recon abilities.");
+            agent.setDescription("Born from the eternal winter of Russia's tundra, Sova tracks, finds, and eliminates enemies with ruthless efficiency and precision. His custom bow and incredible scouting abilities ensure that even if you run, you cannot hide.");
             agent.setRole("Initiator");
 
             agentRepository.save(agent);
@@ -190,7 +197,7 @@ class JdbcAgentRepositoryTest {
             // Arrange
             Agent agent = new AgentImpl();
             agent.setName("Sage");
-            agent.setDescription("A sentinel with healing abilities.");
+            agent.setDescription("The stronghold of China, Sage creates safety for herself and her team wherever she goes. Able to revive fallen friends and stave off aggressive pushes, she provides a calm center to a hellish fight.");
             agent.setRole("Sentinel");
 
             agentRepository.save(agent);
@@ -212,18 +219,18 @@ class JdbcAgentRepositoryTest {
         void getAgentByNameTest() {
             // Arrange
             Agent agent = new AgentImpl();
-            agent.setName("Jett");
-            agent.setDescription("A duelist with great mobility and offensive capabilities.");
-            agent.setRole("Duelist");
+            agent.setName("Cypher");
+            agent.setDescription("The Moroccan information broker, Cypher is a one-man surveillance network who keeps tabs on the enemy's every move. No secret is safe. No maneuver goes unseen. Cypher is always watching.");
+            agent.setRole("Sentinel");
 
             agentRepository.save(agent);
 
             // Act
-            Agent retrievedAgent = agentRepository.getByName("Jett");
+            Agent retrievedAgent = agentRepository.getByName("Cypher");
 
             // Assert
             assertNotNull(retrievedAgent, "Agent should not be null");
-            assertEquals("Jett", retrievedAgent.getName(), "Agent name should match the expected name");
+            assertEquals("Cypher", retrievedAgent.getName(), "Agent name should match the expected name");
         }
 
         /**

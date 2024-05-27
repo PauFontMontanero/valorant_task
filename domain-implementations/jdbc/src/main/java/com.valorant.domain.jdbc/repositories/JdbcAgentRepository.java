@@ -18,6 +18,7 @@ public class JdbcAgentRepository implements AgentRepository {
     private static final String SELECT_AGENT_BY_NAME = "SELECT * FROM AGENT WHERE NAME = ?";
     private static final String INSERT_AGENT = "INSERT INTO AGENT (NAME, DESCRIPTION, ROLE) VALUES (?, ?, ?)";
     private static final String DELETE_AGENT = "DELETE FROM AGENT WHERE AGENT_ID = ?";
+    private static final String UPDATE_AGENT = "UPDATE AGENT SET NAME = ?, DESCRIPTION = ?, ROLE = ? WHERE AGENT_ID = ?";
     private final Connection connection;
 
     /**
@@ -57,19 +58,33 @@ public class JdbcAgentRepository implements AgentRepository {
      */
     @Override
     public void save(Agent agent) {
-        try (PreparedStatement statement = connection.prepareStatement(INSERT_AGENT, Statement.RETURN_GENERATED_KEYS)) {
-            statement.setString(1, agent.getName());
-            statement.setString(2, agent.getDescription());
-            statement.setString(3, agent.getRole());
-            statement.executeUpdate();
-            ResultSet generatedKeys = statement.getGeneratedKeys();
-            if (generatedKeys.next()) {
-                agent.setId(generatedKeys.getInt(1));
+        try {
+            if (agent.getId() == 0) {
+                // Insert a new agent
+                try (PreparedStatement statement = connection.prepareStatement(INSERT_AGENT, Statement.RETURN_GENERATED_KEYS)) {
+                    statement.setString(1, agent.getName());
+                    statement.setString(2, agent.getDescription());
+                    statement.setString(3, agent.getRole());
+                    statement.executeUpdate();
+                    ResultSet generatedKeys = statement.getGeneratedKeys();
+                    if (generatedKeys.next()) {
+                        agent.setId(generatedKeys.getInt(1));
+                    } else {
+                        throw new SQLException("Failed to retrieve auto-generated ID.");
+                    }
+                }
             } else {
-                throw new SQLException("Failed to retrieve auto-generated ID.");
+                // Update an existing agent
+                try (PreparedStatement statement = connection.prepareStatement(UPDATE_AGENT)) {
+                    statement.setString(1, agent.getName());
+                    statement.setString(2, agent.getDescription());
+                    statement.setString(3, agent.getRole());
+                    statement.setInt(4, agent.getId());
+                    statement.executeUpdate();
+                }
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Error while saving agent: " + agent.getName(), e);
+            throw new RuntimeException("Error while saving/updating agent: " + agent.getName(), e);
         }
     }
 

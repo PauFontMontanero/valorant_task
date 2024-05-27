@@ -54,12 +54,28 @@ public class JdbcMapRepository implements MapRepository {
     }
 
     /**
-     * Saves a new map to the database.
+     * Saves a map to the database. If the map already exists (based on its ID), it updates the existing record.
+     * If the map is new (ID is not set), it inserts a new record.
      *
-     * @param map the map to be saved.
+     * @param map the map to be saved or updated.
      */
     @Override
     public void save(Map map) {
+        if (map.getId() == 0) {
+            // Map is new, perform insert operation
+            insertMap(map);
+        } else {
+            // Map already exists, perform update operation
+            updateMap(map);
+        }
+    }
+
+    /**
+     * Inserts a new map into the database.
+     *
+     * @param map the map to be inserted.
+     */
+    private void insertMap(Map map) {
         try (PreparedStatement statement = connection.prepareStatement(INSERT_MAP, PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, map.getName());
             statement.setString(2, map.getType());
@@ -71,6 +87,23 @@ public class JdbcMapRepository implements MapRepository {
             }
         } catch (SQLException e) {
             throw new RuntimeException("Error while saving map: " + map.getName(), e);
+        }
+    }
+
+    /**
+     * Updates an existing map in the database.
+     *
+     * @param map the map to be updated.
+     */
+    private void updateMap(Map map) {
+        String UPDATE_MAP = "UPDATE map SET name = ?, type = ? WHERE map_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_MAP)) {
+            statement.setString(1, map.getName());
+            statement.setString(2, map.getType());
+            statement.setInt(3, map.getId());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Error while updating map: " + map.getId(), e);
         }
     }
 

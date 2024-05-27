@@ -4,70 +4,69 @@ CREATE DATABASE IF NOT EXISTS VALORANT;
 -- Switch to the Valorant database
 USE VALORANT;
 
--- Create the table to store player information
+-- Table to store player information
 CREATE TABLE PLAYER (
-
-    PLAYER_ID INT PRIMARY KEY AUTO_INCREMENT,
-    USERNAME VARCHAR(50) NOT NULL,
-    DISPLAY_NAME VARCHAR(50) NOT NULL,
-    EMAIL VARCHAR(100) NOT NULL,
-    REGION VARCHAR(50),
-    `RANK` ENUM('Unranked', 'Iron 1', 'Iron 2', 'Iron 3', 'Bronze 1', 'Bronze 2', 'Bronze 3', 'Silver 1', 'Silver 2', 'Silver 3', 'Gold 1', 'Gold 2', 'Gold 3', 'Platinum 1', 'Platinum 2', 'Platinum 3', 'Diamond 1', 'Diamond 2', 'Diamond 3', 'Ascendant 1', 'Ascendant 2', 'Ascendant 3', 'Immortal 1', 'Immortal 2', 'Immortal 3', 'Radiant')
+    PLAYER_ID INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for the player
+    USERNAME VARCHAR(50) NOT NULL, -- Player's username
+    DISPLAY_NAME VARCHAR(50) NOT NULL, -- Player's display name
+    EMAIL VARCHAR(100) NOT NULL, -- Player's email address
+    REGION VARCHAR(50), -- Player's region
+    `RANK` ENUM('Unranked', 'Iron 1', 'Iron 2', 'Iron 3', 'Bronze 1', 'Bronze 2', 'Bronze 3', 'Silver 1', 'Silver 2', 'Silver 3', 'Gold 1', 'Gold 2', 'Gold 3', 'Platinum 1', 'Platinum 2', 'Platinum 3', 'Diamond 1', 'Diamond 2', 'Diamond 3', 'Ascendant 1', 'Ascendant 2', 'Ascendant 3', 'Immortal 1', 'Immortal 2', 'Immortal 3', 'Radiant') -- Player's rank in Valorant
 );
 
--- Create the table to store map information
+-- Table to store map information
 CREATE TABLE MAP (
-    MAP_ID INT PRIMARY KEY AUTO_INCREMENT,
-    NAME ENUM('Ascent', 'Bind', 'Breeze', 'IceBox', 'Lotus', 'Split', 'Sunset', 'Fracture', 'Haven', 'Pearl') NOT NULL,
-    TYPE ENUM('Competitive', 'Unranked', 'Spike Rush', 'Deathmatch', 'Team Deathmatch', 'Premier', 'Swift Play') NOT NULL
+    MAP_ID INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for the map
+    NAME VARCHAR(100) NOT NULL, -- Name of the map
+    TYPE ENUM('Competitive', 'Unranked', 'Spike Rush', 'Deathmatch', 'Team Deathmatch', 'Premier', 'Swift Play') NOT NULL -- Type of the map in Valorant
 );
 
+-- Table to store match information
 CREATE TABLE `MATCH` (
-    MATCH_ID INT PRIMARY KEY AUTO_INCREMENT,
-    PLAYED_ON DATETIME NOT NULL,
-    MAP_ID INT,
-    OUTCOME ENUM('Victory', 'Defeat', 'Draw') NOT NULL,
-    FOREIGN KEY (MAP_ID) REFERENCES MAP(MAP_ID)
+    MATCH_ID INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for the match
+    PLAYED_ON DATETIME NOT NULL, -- Date and time when the match was played
+    MAP_ID INT, -- Foreign key referencing the map played
+    OUTCOME ENUM('Victory', 'Defeat', 'Draw') NOT NULL, -- Outcome of the match
+    FOREIGN KEY (MAP_ID) REFERENCES MAP(MAP_ID) -- Relationship with the map table
 );
 
--- Create the table to store agent information
+-- Table to store agent information
 CREATE TABLE AGENT (
-    AGENT_ID INT PRIMARY KEY AUTO_INCREMENT,
-    NAME VARCHAR(50) NOT NULL,
-    DESCRIPTION VARCHAR(250) NOT NULL,
-    ROLE ENUM('Duelist', 'Initiator', 'Controller', 'Sentinel') NOT NULL
+    AGENT_ID INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for the agent
+    NAME VARCHAR(50) NOT NULL, -- Name of the agent
+    DESCRIPTION VARCHAR(250) NOT NULL, -- Description of the agent
+    ROLE ENUM('Duelist', 'Initiator', 'Controller', 'Sentinel') NOT NULL -- Role of the agent in Valorant
 );
 
--- Create the table to store weapon information
+-- Table to store weapon information
 CREATE TABLE WEAPON (
-    WEAPON_ID INT PRIMARY KEY AUTO_INCREMENT,
-    NAME VARCHAR(100) NOT NULL,
-    TYPE ENUM('Sidearm', 'SMG', 'Rifle', 'Sniper Rifle', 'Shotgun', 'Machine Gun', 'Melee') NOT NULL
+    WEAPON_ID INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for the weapon
+    NAME VARCHAR(100) NOT NULL, -- Name of the weapon
+    TYPE ENUM('Sidearm', 'SMG', 'Rifle', 'Sniper Rifle', 'Shotgun', 'Machine Gun', 'Melee') NOT NULL -- Type of the weapon in Valorant
 );
 
--- Create the table to associate players with matches
+-- Table to associate players with matches
 CREATE TABLE MATCH_PLAYER (
-    MATCH_PLAYER_ID INT PRIMARY KEY AUTO_INCREMENT,
-    MATCH_ID INT,
-    PLAYER_ID INT,
-    FOREIGN KEY (MATCH_ID) REFERENCES `MATCH`(MATCH_ID),
-    FOREIGN KEY (PLAYER_ID) REFERENCES PLAYER(PLAYER_ID)
+    MATCH_PLAYER_ID INT PRIMARY KEY AUTO_INCREMENT, -- Unique identifier for the match-player relationship
+    MATCH_ID INT, -- Foreign key referencing the match
+    PLAYER_ID INT, -- Foreign key referencing the player
+    FOREIGN KEY (MATCH_ID) REFERENCES `MATCH`(MATCH_ID), -- Relationship with the match table
+    FOREIGN KEY (PLAYER_ID) REFERENCES PLAYER(PLAYER_ID) -- Relationship with the player table
 );
 
--- Create the table to represent the one-to-one relationship between players and agents
+-- Table representing the one-to-one relationship between players and agents
 CREATE TABLE PLAYER_AGENT (
-    PLAYER_ID INT PRIMARY KEY,
-    AGENT_ID INT,
-    FOREIGN KEY (PLAYER_ID) REFERENCES PLAYER(PLAYER_ID) ON DELETE CASCADE,
-    FOREIGN KEY (AGENT_ID) REFERENCES AGENT(AGENT_ID) ON DELETE CASCADE,
-    UNIQUE (PLAYER_ID, AGENT_ID) -- Ensure this is present for ON DUPLICATE KEY UPDATE to work
+    PLAYER_ID INT PRIMARY KEY, -- Foreign key referencing the player
+    AGENT_ID INT, -- Foreign key referencing the agent
+    FOREIGN KEY (PLAYER_ID) REFERENCES PLAYER(PLAYER_ID) ON DELETE CASCADE, -- Relationship with the player table
+    FOREIGN KEY (AGENT_ID) REFERENCES AGENT(AGENT_ID) ON DELETE CASCADE, -- Relationship with the agent table
+    UNIQUE (PLAYER_ID, AGENT_ID) -- Ensure uniqueness for ON DUPLICATE KEY UPDATE to work
 );
 
-
--- Create the table to represent the one-to-one relationship between players and weapons
+-- Table representing the one-to-one relationship between players and weapons
 CREATE TABLE PLAYER_WEAPON (
-    PLAYER_ID INT PRIMARY KEY,
-    WEAPON_ID INT,
-    FOREIGN KEY (PLAYER_ID) REFERENCES PLAYER(PLAYER_ID) ON DELETE CASCADE,
-    FOREIGN KEY (WEAPON_ID) REFERENCES WEAPON(WEAPON_ID) ON DELETE CASCADE
+    PLAYER_ID INT PRIMARY KEY, -- Foreign key referencing the player
+    WEAPON_ID INT, -- Foreign key referencing the weapon
+    FOREIGN KEY (PLAYER_ID) REFERENCES PLAYER(PLAYER_ID) ON DELETE CASCADE, -- Relationship with the player table
+    FOREIGN KEY (WEAPON_ID) REFERENCES WEAPON(WEAPON_ID) ON DELETE CASCADE -- Relationship with the weapon table
 );
