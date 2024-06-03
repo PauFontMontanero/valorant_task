@@ -1,7 +1,10 @@
 package com.valorant.domain.jpa.models;
 
-import com.valorant.models.Agent;
-import com.valorant.models.Map;
+import com.valorant.models.*;
+
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JpaModelFactory {
 
@@ -98,5 +101,127 @@ public class JpaModelFactory {
                 entity.setType(type);
             }
         };
+    }
+
+    public static MatchEntity toEntity(Match match) {
+        MatchEntity entity = new MatchEntity();
+        entity.setId(match.getId());
+        entity.setPlayedOn(match.getPlayedOn());
+        entity.setOutcome(match.getOutcome());
+        entity.setMapId(match.getMapId());
+        return entity;
+    }
+
+    public static Match toModel(MatchEntity entity) {
+        return new Match() {
+            @Override
+            public int getId() {
+                return entity.getId();
+            }
+
+            @Override
+            public void setId(int id) {
+                entity.setId(id);
+            }
+
+            @Override
+            public LocalDateTime getPlayedOn() {
+                return entity.getPlayedOn();
+            }
+
+            @Override
+            public void setPlayedOn(LocalDateTime playedOn) {
+                entity.setPlayedOn(playedOn);
+            }
+
+            @Override
+            public String getOutcome() {
+                return entity.getOutcome();
+            }
+
+            @Override
+            public void setOutcome(String outcome) {
+                entity.setOutcome(outcome);
+            }
+
+            @Override
+            public int getMapId() {
+                return entity.getMap().getId();
+            }
+
+            @Override
+            public void setMapId(int mapId) {
+                if (entity.getMap() == null) {
+                    entity.setMap(new MapEntity());
+                }
+                entity.getMap().setId(mapId);
+            }
+        };
+    }
+
+    public static WeaponEntity toEntity(Weapon weapon) {
+        WeaponEntity entity = new WeaponEntity();
+        entity.setId(weapon.getId());
+        entity.setName(weapon.getName());
+        entity.setType(weapon.getType());
+        return entity;
+    }
+
+    public static Weapon toModel(WeaponEntity entity) {
+        return new Weapon() {
+            @Override
+            public int getId() {
+                return entity.getId();
+            }
+
+            @Override
+            public void setId(int id) {
+                entity.setId(id);
+            }
+
+            @Override
+            public String getName() {
+                return entity.getName();
+            }
+
+            @Override
+            public void setName(String name) {
+                entity.setName(name);
+            }
+
+            @Override
+            public String getType() {
+                return entity.getType();
+            }
+
+            @Override
+            public void setType(String type) {
+                entity.setType(type);
+            }
+        };
+    }
+
+    public static PlayerEntity toEntity(Player player) {
+        PlayerEntity entity = new PlayerEntity();
+        entity.setId(player.getId());
+        entity.setUsername(player.getUsername());
+        entity.setDisplayName(player.getDisplayName());
+        entity.setEmail(player.getEmail());
+        entity.setRegion(player.getRegion());
+        entity.setRank(player.getRank());
+        entity.setMatches(player.getMatches().stream().map(JpaModelFactory::toEntity).collect(Collectors.toSet()));
+        return entity;
+    }
+
+    public static Player toModel(PlayerEntity entity) {
+        Player player = new PlayerImpl();
+        player.setId(entity.getId());
+        player.setUsername(entity.getUsername());
+        player.setDisplayName(entity.getDisplayName());
+        player.setEmail(entity.getEmail());
+        player.setRegion(entity.getRegion());
+        player.setRank(entity.getRank());
+        player.setMatches(entity.getMatches().stream().map(JpaModelFactory::toModel).collect(Collectors.toSet()));
+        return player;
     }
 }

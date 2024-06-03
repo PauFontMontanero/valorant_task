@@ -2,6 +2,7 @@ package com.valorant.domain.jpa.models;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -24,7 +25,7 @@ public class MatchEntity implements com.valorant.models.Match {
     private MapEntity map;
 
     @ManyToMany(mappedBy = "matches")
-    private Set<PlayerEntity> players;
+    private Set<PlayerEntity> players = new HashSet<>();
 
     // Getters and setters
     @Override

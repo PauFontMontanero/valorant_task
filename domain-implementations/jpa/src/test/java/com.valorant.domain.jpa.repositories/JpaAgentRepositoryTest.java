@@ -21,15 +21,6 @@ class JpaAgentRepositoryTest {
     @BeforeAll
     static void setUpBeforeClass() {
         entityManagerFactory = Persistence.createEntityManagerFactory("valorant-mysql");
-        EntityManager em = entityManagerFactory.createEntityManager();
-        em.getTransaction().begin();
-
-        // Delete records from dependent tables first
-        em.createNativeQuery("DELETE FROM PLAYER_AGENT").executeUpdate();
-        em.createNativeQuery("DELETE FROM AGENT").executeUpdate();
-
-        em.getTransaction().commit();
-        em.close();
     }
 
     @AfterAll

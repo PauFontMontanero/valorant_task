@@ -7,6 +7,7 @@ import com.valorant.repositories.MapRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -27,12 +28,14 @@ public class JpaMapRepository implements MapRepository {
             if (model.getId() <= 0) {
                 entityManager.persist(entity);
                 model.setId(entity.getId());
-            } else if (!entityManager.contains(entity)) {
-                entityManager.merge(entity);
+            } else {
+                entity = entityManager.merge(entity);
+                model.setId(entity.getId());
             }
             transaction.commit();
         } catch (Exception e) {
             transaction.rollback();
+            throw new RuntimeException("Error saving map", e);
         }
     }
 
@@ -41,13 +44,16 @@ public class JpaMapRepository implements MapRepository {
         EntityTransaction transaction = entityManager.getTransaction();
         try {
             transaction.begin();
-            MapEntity entity = JpaModelFactory.toEntity(model);
-            entityManager.remove(entityManager.contains(entity) ? entity : entityManager.merge(entity));
+            MapEntity entity = entityManager.find(MapEntity.class, model.getId());
+            if (entity != null) {
+                entityManager.remove(entity);
+            }
             transaction.commit();
         } catch (Exception e) {
             if (transaction.isActive()) {
                 transaction.rollback();
             }
+            throw new RuntimeException("Error deleting map", e);
         }
     }
 
@@ -73,9 +79,10 @@ public class JpaMapRepository implements MapRepository {
     @Override
     public Map getByName(String name) {
         try {
-            MapEntity entity = entityManager.createQuery("SELECT m FROM MapEntity m WHERE m.name = :name", MapEntity.class)
-                    .setParameter("name", name)
-                    .getSingleResult();
+            TypedQuery<MapEntity> query = entityManager.createQuery("SELECT m FROM MapEntity m WHERE m.name = :name", MapEntity.class);
+            query.setParameter("name", name);
+            query.setMaxResults(1);
+            MapEntity entity = query.getSingleResult();
             return JpaModelFactory.toModel(entity);
         } catch (NoResultException e) {
             return null;

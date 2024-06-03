@@ -5,7 +5,9 @@
       <configuration>
         <setting name="validation-enabled" value="true" />
         <setting name="provider-name" value="Hibernate" />
-        <datasource-mapping />
+        <datasource-mapping>
+          <factory-entry name="valorant-mysql" value="906e3378-3835-407a-ac0c-af777436d902" />
+        </datasource-mapping>
         <naming-strategy-map />
         <deploymentDescriptor name="persistence.xml" url="file://$MODULE_DIR$/../../../../domain-implementations/jpa/src/main/resources/META-INF/persistence.xml" />
       </configuration>

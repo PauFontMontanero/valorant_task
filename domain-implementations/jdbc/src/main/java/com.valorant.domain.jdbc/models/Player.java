@@ -1,6 +1,9 @@
 package com.valorant.domain.jdbc.models;
 
+import com.valorant.models.Match;
+
 import java.io.Serializable;
+import java.util.Set;
 
 /**
  * Represents a player in the Valorant game.
@@ -132,5 +135,15 @@ public class Player implements com.valorant.models.Player, Serializable {
     @Override
     public void setRank(String rank) {
         this.rank = rank;
+    }
+
+    @Override
+    public Set<Match> getMatches() {
+        return Set.of();
+    }
+
+    @Override
+    public void setMatches(Set<Match> matches) {
+
     }
 }
