@@ -1,0 +1,7 @@
+JDBC | Paste the following data in app.properties to use JDBC - Implementation
+repositoryFactory=com.valorant.domain.jdbc.repositories.JdbcRepositoryFactory
+modelFactory=com.valorant.domain.jdbc.models.JdbcModelFactory
+
+JPA | Paste the following data in app.properties to use JPA - Implementation
+repositoryFactory=com.valorant.domain.jpa.repositories.JpaRepositoryFactory
+modelFactory=com.valorant.domain.jpa.models.JpaModelFactory

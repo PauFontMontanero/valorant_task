@@ -23,7 +23,7 @@
             <property name="hibernate.format_sql" value="true"/>
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="jakarta.persistence.sql-load-script-source" value="/data.sql"/>
-            <property name="hibernate.use_sql_comments" value="true" />
+            <property name="hibernate.use_sql_comments" value="false" />
         </properties>
     </persistence-unit>
 </persistence>

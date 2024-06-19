@@ -1,8 +1,9 @@
 package com.valorant.domain.jpa.repositories;
 
+import com.valorant.repositories.*;
 import jakarta.persistence.EntityManager;
 
-public class JpaRepositoryFactory {
+public class JpaRepositoryFactory implements RepositoryFactory {
 
     private final EntityManager entityManager;
 
@@ -10,35 +11,28 @@ public class JpaRepositoryFactory {
         this.entityManager = entityManager;
     }
 
-    public JpaAgentRepository createAgentRepository() {
+    @Override
+    public AgentRepository getAgentRepository() {
         return new JpaAgentRepository(entityManager);
     }
 
-    public JpaMapRepository createMapRepository() {
+    @Override
+    public MapRepository getMapRepository() {
         return new JpaMapRepository(entityManager);
     }
 
-    public JpaMatchRepository createMatchRepository() {
+    @Override
+    public MatchRepository getMatchRepository() {
         return new JpaMatchRepository(entityManager);
     }
 
-    public JpaPlayerRepository createPlayerRepository() {
+    @Override
+    public PlayerRepository getPlayerRepository() {
         return new JpaPlayerRepository(entityManager);
     }
 
-    public JpaWeaponRepository createWeaponRepository() {
+    @Override
+    public WeaponRepository getWeaponRepository() {
         return new JpaWeaponRepository(entityManager);
-    }
-
-    public JpaMatchPlayerRepository createMatchPlayerRepository() {
-        return new JpaMatchPlayerRepository(entityManager, createMatchRepository());
-    }
-
-    public JpaPlayerAgentRepository createPlayerAgentRepository() {
-        return new JpaPlayerAgentRepository(entityManager, createAgentRepository());
-    }
-
-    public JpaPlayerWeaponRepository createPlayerWeaponRepository() {
-        return new JpaPlayerWeaponRepository(entityManager, createWeaponRepository());
     }
 }

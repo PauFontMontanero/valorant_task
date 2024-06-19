@@ -6,7 +6,32 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class JpaModelFactory {
+public class JpaModelFactory implements ModelFactory {
+
+    @Override
+    public Agent createAgent() {
+        return new AgentImpl();
+    }
+
+    @Override
+    public Map createMap() {
+        return new MapImpl();
+    }
+
+    @Override
+    public Match createMatch() {
+        return new MatchImpl();
+    }
+
+    @Override
+    public Player createPlayer() {
+        return new PlayerImpl();
+    }
+
+    @Override
+    public Weapon createWeapon() {
+        return new WeaponImpl();
+    }
 
     public static AgentEntity toEntity(Agent agent) {
         AgentEntity entity = new AgentEntity();

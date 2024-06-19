@@ -22,6 +22,10 @@ public class WeaponImpl implements Weapon {
         this.type = type;
     }
 
+    public WeaponImpl() {
+
+    }
+
     /**
      * Get the unique identifier of the weapon.
      *
