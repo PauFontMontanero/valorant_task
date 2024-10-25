@@ -1,0 +1,38 @@
+# 1. Get all matches
+GET http://localhost:80/match
+Accept: application/json
+
+###
+
+# 2. Get a specific match by ID
+GET http://localhost:80/match/2
+Accept: application/json
+
+###
+
+# 3. POST Create a new match
+POST http://localhost:80/match
+Content-Type: application/json
+
+{
+  "playedOn": "2024-10-20T10:00:00",
+  "mapId": 1,
+  "outcome": "Defeat"
+}
+
+###
+
+# 4. PUT Update an existing match
+PUT http://localhost:80/match/2
+Content-Type: application/json
+
+{
+  "playedOn": "2024-10-20T10:00:00",
+  "mapId": 1,
+  "outcome": "Victory"
+}
+
+###
+
+# 5. DELETE a match
+DELETE http://localhost:80/match/1

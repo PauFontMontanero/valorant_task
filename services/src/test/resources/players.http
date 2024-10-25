@@ -1,0 +1,42 @@
+# 1. Get all players
+GET http://localhost:80/player
+Accept: application/json
+
+###
+
+# 2. Get a specific player by ID
+GET http://localhost:80/player/2
+Accept: application/json
+
+###
+
+# 3. POST Create a new player
+POST http://localhost:80/player
+Content-Type: application/json
+
+{
+  "username": "NewPlayer",
+  "displayName": "NewPlayer#123",
+  "email": "newplayer123@gmail.com",
+  "region": "EUW",
+  "rank": "Bronze 2"
+}
+
+###
+
+# 4. PUT Update an existing player
+PUT http://localhost:80/player/1
+Content-Type: application/json
+
+{
+  "username": "UpdatedPlayer",
+  "displayName": "UpdatedPlayer#456",
+  "email": "updatedplayer456@gmail.com",
+  "region": "NA",
+  "rank": "Gold 3"
+}
+
+###
+
+# 5. DELETE a player
+DELETE http://localhost:80/player/6

@@ -11,4 +11,4 @@ plugins {
 }
 
 rootProject.name = "valorant"
-include("app", "domain", "utilities", ":domain-implementations:file", ":domain-implementations:jdbc", ":domain-implementations:jpa")
+include("app", "domain", "utilities", ":domain-implementations:file", ":domain-implementations:jdbc", ":domain-implementations:jpa", "services")

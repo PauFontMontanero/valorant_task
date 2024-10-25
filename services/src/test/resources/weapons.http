@@ -1,0 +1,36 @@
+# 1. Get all weapons
+GET http://localhost:80/weapon
+Accept: application/json
+
+###
+
+# 2. Get a specific weapon by ID
+GET http://localhost:80/weapon/2
+Accept: application/json
+
+###
+
+# 3. POST Create a new weapon
+POST http://localhost:80/weapon
+Content-Type: application/json
+
+{
+  "name": "Spectre",
+  "type": "SMG"
+}
+
+###
+
+# 4. PUT Update an existing weapon
+PUT http://localhost:80/weapon/4
+Content-Type: application/json
+
+{
+  "name": "Operator",
+  "type": "Sniper Rifle"
+}
+
+###
+
+# 5. DELETE a weapon
+DELETE http://localhost:80/weapon/1

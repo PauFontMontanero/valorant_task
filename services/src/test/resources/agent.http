@@ -1,0 +1,37 @@
+
+#Get from id method
+GET http://localhost:80/agent/3
+Accept: application/json
+
+
+###
+#Add
+POST http://localhost:80/agent
+Content-Type: application/json
+
+{
+  "name": "Phoenix",
+  "description": "A fiery duelist with powerful flashes",
+  "role": "Duelist"
+}
+
+###
+DELETE http://localhost:80/agent/4
+Accept: application/json
+
+
+###
+#Get all method
+GET http://localhost:80/agent/
+Accept: application/json
+###
+#Update from id method
+PUT http://localhost:80/agent/5
+Content-Type: application/json
+
+{
+  "id": 5,
+  "name": "Skye",
+  "description": "A australian piece of shit",
+  "role": "Sentinel"
+}

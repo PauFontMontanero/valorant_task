@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/domain-implementations/jpa/valorant.domain-implementations.jpa.main.iml" filepath="$PROJECT_DIR$/.idea/modules/domain-implementations/jpa/valorant.domain-implementations.jpa.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/services/valorant.services.test.iml" filepath="$PROJECT_DIR$/.idea/modules/services/valorant.services.test.iml" />
     </modules>
   </component>
 </project>

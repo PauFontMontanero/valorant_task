@@ -1,0 +1,37 @@
+#Get all method
+GET http://localhost:80/map/
+Accept: application/json
+
+###
+
+#Get from id method
+GET http://localhost:80/map/1
+Accept: application/json
+
+
+###
+#Add
+POST http://localhost:80/map
+Content-Type: application/json
+
+{
+  "name": "Fracture",
+  "type": "Unranked"
+}
+
+###
+DELETE http://localhost:80/map/6
+Accept: application/json
+
+
+###
+
+#Update from id method
+PUT http://localhost:80/map/5
+Content-Type: application/json
+
+{
+  "id": 5,
+  "name": "Painintheass",
+  "type": "Unranked"
+}
